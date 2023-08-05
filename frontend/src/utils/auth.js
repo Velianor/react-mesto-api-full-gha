@@ -15,6 +15,12 @@ class Auth {
   _request(url, options) {
     return fetch(url, options).then(this._checkResponse);
   }
+  
+  app.get('/crash-test', () => {
+    setTimeout(() => {
+      throw new Error('Сервер сейчас упадёт');
+    }, 0);
+  });
 
   register(email, password) {
     return this._request(`${this._baseUrl}/signup`, {
@@ -44,7 +50,7 @@ class Auth {
 }
 
 const auth = new Auth({
-  baseUrl: "http://mestopavel.nomoreparties.co/api",
+  baseUrl: "https://mestopavel.nomoreparties.co/api",
   headers: {
     "Content-Type": "application/json",
   },
