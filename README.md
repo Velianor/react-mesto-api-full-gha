@@ -8,8 +8,8 @@
 
 ## Ссылки на проект
 
-IP-адрес 84.201.153.215
+IP-адрес 158.160.65.31
 
-Frontend https://...
+Frontend [https://mestopavel.nomoreparties.co/](https://mestopavel.nomoreparties.co/)
 
-Backend https://...
+Backend [https://mestopavel.nomoreparties.co/api/](https://mestopavel.nomoreparties.co/api/)
