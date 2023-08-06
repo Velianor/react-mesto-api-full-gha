@@ -16,11 +16,7 @@ class Auth {
     return fetch(url, options).then(this._checkResponse);
   }
   
-  app.get('/crash-test', () => {
-    setTimeout(() => {
-      throw new Error('Сервер сейчас упадёт');
-    }, 0);
-  });
+
 
   register(email, password) {
     return this._request(`${this._baseUrl}/signup`, {
