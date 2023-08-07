@@ -9,11 +9,13 @@ const { errors } = require('celebrate');
 const routes = require('./routes/index');
 const errorHandler = require('./middlewares/errorHandler');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-
+const auth = require('./middlewares/auth');
 const { PORT = 3000 } = process.env;
 
 const app = express();
 app.use(cors());
+
+
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -23,11 +25,29 @@ const limiter = rateLimit({
   message: 'Слишком много запросов с данного IP, повторите попытку позднее',
 });
 
-app.use(helmet());
-app.use(limiter);
-app.use(express.json());
+app.use((req, res, next) => {
+  const { origin } = req.headers;
+  const { method } = req;
+  const DEFAULT_ALLOWED_METHODS = 'GET,HEAD,PUT,PATCH,POST,DELETE';
+  const requestHeaders = req.headers['access-control-request-headers'];
+
+  if (allowedCors.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', true);
+  }
+
+  if (method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Methods', DEFAULT_ALLOWED_METHODS);
+    res.header('Access-Control-Allow-Headers', requestHeaders);
+    res.header('Access-Control-Allow-Credentials', true);
+    return res.end();
+  }
+  next();
+});
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(express.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 
@@ -39,13 +59,43 @@ app.get('/crash-test', () => {
   }, 0);
 });
 
-app.use(routes);
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+  }),
+}), login);
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+    avatar: Joi.string().regex(regex),
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(4),
+  }),
+}), createUser);
+
+app.use(auth);
+
+app.use('/users', require('./routes/users'));
+app.use('/cards', require('./routes/cards'));
+
+app.use('/*', () => {
+  throw new NotFoundError('Not found');
+});
 
 app.use(errorLogger);
+
 app.use(errors());
-app.use(errorHandler);
+
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+  return res
+    .status(statusCode)
+    .send({ message: statusCode === 500 ? 'Ошибка на сервере' : message });
+});
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
-  console.log(`App listening on port ${PORT}`);
+  console.log(`App listening on port: ${PORT}`);
 });
