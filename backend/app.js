@@ -45,9 +45,13 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(helmet());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(limiter);
+app.use(errorHandler);
+app.use(routes);
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 
