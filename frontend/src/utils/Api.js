@@ -1,7 +1,7 @@
 class Api {
-  constructor(config) {
-    this._baseUrl = config.baseUrl;
-    this._headers = config.headers;
+  constructor(options) {
+    this._baseUrl = options.baseUrl;
+    this._headers = options.headers;
   }
 
   _checkResponse(res) {
@@ -43,10 +43,7 @@ class Api {
     return this._request(`${this._baseUrl}/cards`, {
       method: "POST",
       headers: this._headers,
-      body: JSON.stringify({
-        name: data.name,
-        link: data.link,
-      }),
+      body: JSON.stringify(data),
     });
   }
 
@@ -66,6 +63,7 @@ class Api {
       headers: this._headers,
     });
   }
+
   changeLikeCardStatus(cardId, isLiked) {
     return this._request(`${this._baseUrl}/cards/${cardId}/likes`, {
       method: isLiked ? "PUT" : "DELETE",
@@ -79,11 +77,13 @@ class Api {
 }
 
 const api = new Api({
+  //baseUrl: 'https://mesto.nomoreparties.co/v1/cohort-64',
+  //baseUrl: 'https://localhost:3000',
   baseUrl: "/api/",
   headers: {
-        authorization: `Bearer ${localStorage.getItem('token')}`,
-        'content-type': 'application/json'
-   },
+    authorization: `Bearer ${localStorage.getItem("token")}`,
+    "content-type": "application/json",
+  },
 });
 
 export default api;

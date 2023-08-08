@@ -1,55 +1,55 @@
 class Auth {
-  constructor(config) {
-    this._baseUrl = config.baseUrl;
-    this._headers = config.headers;
-  }
+  constructor(baseUrl) {
+      this._baseUrl = baseUrl;
+  };
 
   _checkResponse(res) {
-    if (res.ok) {
-      return res.json();
-    } else {
-      return Promise.reject(`Ошибка: ${res.status}`);
-    }
-  }
+      if (res.ok) {
+          return res.json();
+      } else {
+          return Promise.reject(`Ошибка: ${res.status}`);
+      }
+  };
 
-  _request(url, options) {
-    return fetch(url, options).then(this._checkResponse);
-  }
   
-
-
   register(email, password) {
-    return this._request(`${this._baseUrl}/signup`, {
-      method: "POST",
-      headers: this._headers,
-      body: JSON.stringify({ email, password }),
-    });
-  }
+      return fetch(`${this._baseUrl}/signup`, {
+          method: 'POST',
+          headers: {
+              'content-type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+      })
+          .then(this._checkResponse)
+  };
+
+
 
   login(email, password) {
-    return this._request(`${this._baseUrl}/signin`, {
-      method: "POST",
-      headers: this._headers,
-      body: JSON.stringify({ email, password }),
-    });
-  }
+      return fetch(`${this._baseUrl}/signin`, {
+          method: 'POST',
+          headers: {
+              'content-type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+      })
+          .then(this._checkResponse)
+  };
+
+
 
   checkToken(token) {
-    return this._request(`${this._baseUrl}/users/me`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-  }
-}
+      return fetch(`${this._baseUrl}/users/me`, {
+          method: 'GET',
+          headers: {
+              'content-Type': 'application/json',
+              authorization: `Bearer ${token}`,
+          },
+      })
+          .then(this._checkResponse);
+  };
+};
 
-const auth = new Auth({
-  baseUrl: "https://mestopavel.nomoreparties.co/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+const auth = new Auth('https://mestopavel.nomoreparties.co/api');
 
 export default auth;
